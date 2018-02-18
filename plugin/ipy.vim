@@ -94,7 +94,7 @@ function! IPyRunCell()
     while len(lines) > 0 && match(lines[0], '^\s*$') > -1
         let lines = lines[1:]
     endwhile
-    let params = substitute(getline(lnum1, start, "", ""))
+    let params = substitute(getline(lnum1), start, "", "")
     call IPyRun(join(lines, "\n"), params)
     return 1
 endfunction
