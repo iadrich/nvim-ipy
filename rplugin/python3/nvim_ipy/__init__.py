@@ -298,10 +298,25 @@ class IPythonPlugin(object):
         # 'connect' waits for kernelinfo, and so must be async
         Async(self).connect(args)
 
+    def _get_tmpl_str(self, params):
+        params = params.replace('  ', ' ').split(' ')
+        if len(params) > 1:
+            conn = params[1]
+            return 'pd.read_sql(con='+conn+', sql="""{CoDe}""")'
+        else:
+            return '{CoDe}'
+
     @neovim.function("IPyRun")
     def ipy_run(self, args):
         code = args[0]
-        silent = bool(args[1]) if len(args) > 1 else False
+        if len(args) > 1 and type(args[1]) == str:
+            tmpl_str = self._get_tmpl_str(args[1])
+            silent = bool(args[2]) if len(args) > 2 else False
+        else:
+            tmpl_str = '{CoDe}'
+            silent = bool(args[1]) if len(args) > 1 else False
+        code = tmpl_str.replace('{CoDe}', code)
+
         if self.km and not self.km.is_alive():
             choice = int(self.vim.funcs.confirm('Kernel died. Restart?', '&Yes\n&No'))
             if choice == 1:
